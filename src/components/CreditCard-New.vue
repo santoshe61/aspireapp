@@ -67,7 +67,7 @@
 <script>
   import { defineComponent, defineEmits, ref, computed, watch } from "vue";
   import { useQuasar } from "quasar";
-  import useCardStore from "../stores/card.js";
+  import useUserStore from "../stores/user.js";
   import validateCard from "../tools/validators/card.js";
 
   const emit = defineEmits(["cardAdded"]);
@@ -80,7 +80,7 @@
     name: "IndexPage",
     setup() {
       const $q = useQuasar();
-      const cardStore = useCardStore();
+      const cardStore = useUserStore();
 
       function addCard() {
         if (newCard.value.accept !== true) {

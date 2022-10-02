@@ -13,7 +13,7 @@
           <q-badge color="positive" class="curreny-badge"> S$ </q-badge>
         </div>
         <div class="col">
-          <h3 class="q-ml-md">{{ user.account.balance }}</h3>
+          <h3 class="q-ml-md">{{ account.balance }}</h3>
         </div>
         <div class="col-auto">
           <q-btn
@@ -362,92 +362,14 @@
   import { useQuasar } from "quasar";
   import CreditCardNew from "../components/CreditCard-New.vue";
   import CreditCardView from "../components/CreditCard-View.vue";
-  import useCardStore from "../stores/card.js";
+  import useUserStore from "../stores/user.js";
 
   let facilityLogo = {
     Visa: "Facility-Visa.svg",
     Master: "Facility-Master.svg",
     Aspire: "Facility-Aspire.svg",
   };
-  let transactions = ref([
-    {
-      id: 1,
-      icon: {
-        name: "file-storage",
-        cssClass: "blue-1",
-      },
-      pos: "BigBazaar",
-      date: "01/10/2022",
-      amount: "100",
-      currency: "INR",
-      type: "D",
-    },
-    {
-      id: 2,
-      icon: {
-        name: "flights",
-        cssClass: "yellow-1",
-      },
-      pos: "Flipkart",
-      date: "01/10/2022",
-      amount: "100",
-      currency: "INR",
-      type: "C",
-    },
-    {
-      id: 3,
-      icon: {
-        name: "megaphone",
-        cssClass: "pink-1",
-      },
-      pos: "BigBazaar",
-      date: "01/10/2022",
-      amount: "100",
-      currency: "S$",
-      type: "C",
-    },
-    {
-      id: 4,
-      icon: {
-        name: "file-storage",
-        cssClass: "blue-1",
-      },
-      pos: "BigBazaar",
-      date: "01/10/2022",
-      amount: "100",
-      currency: "S$",
-      type: "D",
-    },
-    {
-      id: 5,
-      icon: {
-        name: "flights",
-        cssClass: "yellow-1",
-      },
-      pos: "Go Ibibo",
-      date: "01/10/2022",
-      amount: "100",
-      currency: "US$",
-      type: "D",
-    },
-    {
-      id: 1,
-      icon: {
-        name: "megaphone",
-        cssClass: "pink-1",
-      },
-      pos: "BigBazaar",
-      date: "01/10/2022",
-      amount: "100",
-      currency: "S$",
-      type: "D",
-    },
-  ]);
-  let user = ref({
-    account: {
-      balance: "3,000",
-    },
-  });
+
   let newCardDialog = ref(false);
   let tab = ref("cards--my-debit");
 
@@ -455,7 +377,14 @@
     name: "IndexPage",
     setup() {
       const $q = useQuasar();
-      const cardStore = useCardStore();
+      const userStore = useUserStore();
+
+      let account = computed(function(){
+        return userStore.account;
+      });
+      let transactions = computed(function(){
+        return userStore.transactions;
+      });
 
       function cardAdded(newCard) {
         newCard.company = tab.value == "cards--my-debit" ? "aspire" : "other";
@@ -465,9 +394,9 @@
 
       let currentTabCards = computed(() => {
         if (tab.value == "cards--my-debit") {
-          return cardStore.cards.filter((card) => card.company == "aspire");
+          return userStore.cards.filter((card) => card.company == "aspire");
         } else {
-          return cardStore.cards.filter((card) => card.company != "aspire");
+          return userStore.cards.filter((card) => card.company != "aspire");
         }
       });
 
@@ -475,14 +404,14 @@
 
       let isCurrentFreezed = computed(() => {
         return (
-          cards.value.filter((card) => {
+          userStore.cards.filter((card) => {
             return card.id == slide.value;
           })?.[0]?.status == "frozen"
         );
       });
 
       function toggleCard(id) {
-        cards.value = cards.value.map((card) => {
+        userStore.cards.value = userStore.cards.value.map((card) => {
           if (card.id == id) {
             card.isVisible = !card.isVisible;
           }
@@ -496,7 +425,7 @@
             message: "No active cards available!",
           });
         }
-        cards.value = cards.value.map((card) => {
+        userStore.cards.value = userStore.cards.value.map((card) => {
           // console.log(cards);
           if (card.id == slide.value) {
             card.status = card.status === "frozen" ? "active" : "frozen";
@@ -523,7 +452,7 @@
           message: "Are you sure to cancel this card ?",
           cancel: true,
         }).onOk(() => {
-          cards.value = cards.value.filter((card) => card.id !== slide.value);
+          userStore.cards.value = userStore.cards.value.filter((card) => card.id !== slide.value);
           slide.value = currentTabCards.value?.[0]?.id;
         });
       }
@@ -563,7 +492,7 @@
       });
 
       return {
-        user,
+        account,
         currentTabCards,
         transactions,
         facilityLogo,
@@ -571,8 +500,8 @@
         tab,
         slide,
         newCardDialog,
-        newCard,
-        validateCard,
+
+
         freezeUnfreezeCard,
         isCurrentFreezed,
         cancelCard,
