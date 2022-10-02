@@ -1,0 +1,43 @@
+// Quasar SCSS (& Sass) Variables
+// --------------------------------------------------
+// To customize the look and feel of this app, you can override
+// the Sass/SCSS variables found in Quasar's source Sass/SCSS files.
+
+// Check documentation for full list of Quasar variables
+
+// Your own variables (that are declared here) and Quasar's own
+// ones will be available out of the box in your .vue/.scss/.sass files
+
+// It's highly recommended to change the default colors
+// to match your app's branding.
+// Tip: Use the "Theme Builder" on Quasar's documentation website.
+
+$primary   : #325BAF;
+
+$dark      : #0C365A;
+
+$positive  : #01D167;
+$info      : #23CEFD;
+$secondary : #EDF3FF;
+$accent    : #FAFCFF;
+
+
+$negative  : #C10015;
+$warning   : #F2C037;
+$dark-page : #222222;
+
+// Toolbar Variables
+$toolbar-padding : 0;
+$toolbar-min-height: 56px;
+$toolbar-title-font-size: 14pt;
+$toolbar-title-padding : 0;
+
+// Fonts
+$body-font-size   : 13pt;
+
+$body2:     (size: 12pt, line-height: 1.25rem,  letter-spacing: .01786em,  weight: 400);
+$body1:     (size: 13pt, line-height: 1.25rem,   letter-spacing: .03125em,  weight: 400);
+$h6:        (size: 14pt, line-height: 1.25rem,     letter-spacing: .0125em,   weight: 500);
+$h5:        (size: 20pt, line-height: 1rem,   letter-spacing: .0135em,  weight: 600);
+$h4:        (size: 22pt, line-height: 1.25rem,   letter-spacing: .00735em,  weight: 600);
+$h3:        (size: 24pt, line-height: 1.25rem,   letter-spacing: .00735em,  weight: 700);
