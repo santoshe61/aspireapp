@@ -25,7 +25,9 @@
           >
             <img v-if="isMobile" src="/icons/Box.svg" />
             <img v-else src="/icons/box-white.svg" />
-            <span :class="{'q-ml-sm' : true, 'text-info': isMobile}">New card</span>
+            <span :class="{ 'q-ml-sm': true, 'text-info': isMobile }"
+              >New card</span
+            >
           </q-btn>
           <q-dialog
             v-model="newCardDialog"
@@ -40,80 +42,7 @@
               </q-card-section>
 
               <q-card-section>
-                <q-form
-                  @submit="addCard"
-                  @reset="resetForm"
-                  class="q-gutter-md"
-                >
-                  <q-input
-                    v-model="newCard.customer_name"
-                    label="Cardholder name *"
-                    hint="Name printed on card"
-                    lazy-rules
-                    :rules="[
-                      (val) =>
-                        (val && val.length > 2) ||
-                        'Please enter name printed on card, min 3 chars',
-                    ]"
-                    maxlength="200"
-                  />
-
-                  <q-input
-                    type="text"
-                    v-model="newCard.card_number"
-                    placeholder="1234 5678 9012 3456"
-                    label="Card Number *"
-                    lazy-rules
-                    :rules="[validateCard.cardNumber]"
-                    mask="#### #### #### ####"
-                    maxlength="25"
-                  />
-
-                  <div class="row">
-                    <div class="col-5">
-                      <q-input
-                        type="text"
-                        v-model="newCard.card_expiry"
-                        label="Expiry Date *"
-                        placeholder="mm / yy"
-                        mask="## / ##"
-                        lazy-rules
-                        :rules="[validateCard.cardExpiry]"
-                        maxlength="7"
-                        hint="Expiry or valid thru date"
-                      />
-                    </div>
-                    <div class="offset-2 col-5">
-                      <q-input
-                        type="text"
-                        v-model="newCard.card_cvv"
-                        label="CVV *"
-                        lazy-rules
-                        :rules="[validateCard.cardCvv]"
-                        placeholder="123"
-                        mask="###"
-                        maxlength="999"
-                        hint="Card verification value"
-                      />
-                    </div>
-                  </div>
-
-                  <q-toggle
-                    v-model="newCard.accept"
-                    label="I accept the terms & policies of Aspire"
-                  />
-
-                  <div>
-                    <q-btn label="Save Card" type="submit" color="primary" />
-                    <q-btn
-                      label="Reset"
-                      type="reset"
-                      color="primary"
-                      flat
-                      class="q-ml-sm"
-                    />
-                  </div>
-                </q-form>
+                <CreditCardNew @cardAdded="cardAdded" />
               </q-card-section>
             </q-card>
           </q-dialog>
@@ -205,7 +134,10 @@
                   <span class="q-ml-sm">Show card number</span>
                 </q-btn>
               </div>
-              <q-card class="bg-positive desktop__credit-card q-pa-sm" unelevated>
+              <q-card
+                class="bg-positive desktop__credit-card q-pa-sm"
+                unelevated
+              >
                 <q-card-section class="flex">
                   <q-space />
                   <img src="/Logo-lg.svg" />
@@ -428,55 +360,15 @@
 <script>
   import { defineComponent, ref, computed, watch } from "vue";
   import { useQuasar } from "quasar";
-  import validateCard from "../tools/validators/card.js";
+  import CreditCardNew from "../components/CreditCard-New.vue";
+  import CreditCardView from "../components/CreditCard-View.vue";
+  import useCardStore from "../stores/card.js";
 
   let facilityLogo = {
     Visa: "Facility-Visa.svg",
     Master: "Facility-Master.svg",
     Aspire: "Facility-Aspire.svg",
   };
-  let cards = ref([
-    {
-      id: 1,
-      status: "active",
-      company: "aspire",
-      customer_name: "Santosh Ojha",
-      card_number: "1234 5678 9012 3456",
-      card_expiry: "08 / 25",
-      card_cvv: "999",
-      card_facility: "Visa",
-    },
-    {
-      id: 2,
-      status: "active",
-      company: "aspire",
-      customer_name: "Mr. Santosh",
-      card_number: "9999 8888 7777 6666",
-      card_expiry: "01 / 25",
-      card_cvv: "765",
-      card_facility: "Master",
-    },
-    {
-      id: 4,
-      status: "active",
-      company: "other",
-      customer_name: "Mr. Ojha",
-      card_number: "2222 3333 4444 5555",
-      card_expiry: "01 / 25",
-      card_cvv: "888",
-      card_facility: "Visa",
-    },
-    {
-      id: 5,
-      status: "active",
-      company: "other",
-      customer_name: "Mr. Thanh",
-      card_number: "6666 5551 4444 3333",
-      card_expiry: "01 / 25",
-      card_cvv: "676",
-      card_facility: "Visa",
-    },
-  ]);
   let transactions = ref([
     {
       id: 1,
@@ -556,67 +448,38 @@
       balance: "3,000",
     },
   });
-  let newCard = ref({
-    accept: false,
-  });
   let newCardDialog = ref(false);
   let tab = ref("cards--my-debit");
-  let currentTabCards = computed(() => {
-    if (tab.value == "cards--my-debit") {
-      return cards.value.filter((card) => card.company == "aspire");
-    } else {
-      return cards.value.filter((card) => card.company != "aspire");
-    }
-  });
-  let slide = ref(currentTabCards.value?.[0]?.id);
-  let isCurrentFreezed = computed(() => {
-    return (
-      cards.value.filter((card) => {
-        return card.id == slide.value;
-      })?.[0]?.status == "frozen"
-    );
-  });
 
   export default defineComponent({
     name: "IndexPage",
     setup() {
       const $q = useQuasar();
+      const cardStore = useCardStore();
 
-      function addCard() {
-        if (newCard.value.accept !== true) {
-          $q.notify({
-            color: "red-5",
-            textColor: "white",
-            position: "top",
-            icon: "warning",
-            message: "You need to accept the terms and policies first",
-          });
+      function cardAdded(newCard) {
+        newCard.company = tab.value == "cards--my-debit" ? "aspire" : "other";
+        newCardDialog.value = "false";
+        slide.value = newId;
+      }
+
+      let currentTabCards = computed(() => {
+        if (tab.value == "cards--my-debit") {
+          return cardStore.cards.filter((card) => card.company == "aspire");
         } else {
-          let newId = +(cards.value?.[cards.value.length - 1]?.id || 0) + 1;
-          cards.value.push({
-            ...newCard.value,
-            id: newId,
-            status: "active",
-            company: tab.value == "cards--my-debit" ? "aspire" : "other",
-            card_facility: "Visa",
-          });
-          newCardDialog.value = "false";
-          $q.notify({
-            color: "green-4",
-            textColor: "white",
-            position: "top",
-            icon: "check_circle",
-            message: "Card added successfully",
-          });
-          slide.value = newId;
+          return cardStore.cards.filter((card) => card.company != "aspire");
         }
-      }
+      });
 
-      function resetForm() {
-        newCard.value = {
-          accept: false,
-        };
-      }
+      let slide = ref(currentTabCards.value?.[0]?.id);
+
+      let isCurrentFreezed = computed(() => {
+        return (
+          cards.value.filter((card) => {
+            return card.id == slide.value;
+          })?.[0]?.status == "frozen"
+        );
+      });
 
       function toggleCard(id) {
         cards.value = cards.value.map((card) => {
@@ -709,13 +572,13 @@
         slide,
         newCardDialog,
         newCard,
-        addCard,
-        resetForm,
         validateCard,
         freezeUnfreezeCard,
         isCurrentFreezed,
         cancelCard,
-        isMobile: $q.platform.is.mobile
+        isMobile: $q.platform.is.mobile,
+        CreditCardNew,
+        CreditCardView,
       };
     },
   });

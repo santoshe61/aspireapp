@@ -9,9 +9,9 @@ const routes = [
   },
   {
     path: '/desktop',
-    component: () => import('layouts/DesktopLayout.vue'),
+    component: () => import('layouts/MainLayout.vue'),
     children: [
-      { path: '', component: () => import('pages/DesktopPage.vue') }
+      { path: '', component: () => import('pages/IndexPage.vue') }
     ]
   },
 
