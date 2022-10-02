@@ -1,16 +1,43 @@
 <template>
   <q-layout view="lHh Lpr lFf" class="bg-dark">
-    <q-drawer v-model="leftDrawerOpen" show-if-above bordered>
-      <q-list>
-        <q-item-label header> Essential Links </q-item-label>
-
-        <EssentialLink
-          v-for="link in essentialLinks"
-          :key="link.title"
-          v-bind="link"
-        />
-      </q-list>
+    <q-drawer v-model="leftDrawerOpen" show-if-above bordered class="bg-dark q-pa-xl" :width="340">
+      <img src="/Logo-lg-green.svg" />
+      <p class="q-mt-sm q-mb-xl text-muted-2">Trusted way of banking for 3,000+ SMEs and startups in Singapore</p>
+      <div class="column">
+          <div class="col q-my-lg">
+            <q-avatar size="sm">
+              <img src="/icons/Logo.svg" />
+            </q-avatar>
+            <span class="q-ml-sm text-grey-5">Home</span>
+          </div>
+          <div class="col q-my-lg">
+            <q-avatar size="sm">
+              <img src="/icons/pay.svg" />
+            </q-avatar>
+            <span class="q-ml-sm text-positive text-bold">Cards</span>
+          </div>
+          <div class="col q-my-lg">
+            <q-avatar size="sm">
+              <img src="/icons/Payments.svg" />
+            </q-avatar>
+            <span class="q-ml-sm text-grey-5">Payments</span>
+          </div>
+          <div class="col q-my-lg">
+            <q-avatar size="sm">
+              <img src="/icons/Credit.svg" />
+            </q-avatar>
+            <span class="q-ml-sm text-grey-5">Credit</span>
+          </div>
+          <div class="col q-my-lg">
+            <q-avatar size="sm">
+              <img src="/icons/Account.svg" />
+            </q-avatar>
+            <span class="q-ml-sm text-grey-5">Profile</span>
+          </div>
+        </div>
     </q-drawer>
+
+
 
     <q-page-container>
       <router-view />
@@ -54,7 +81,7 @@
 
 <script>
   import { defineComponent, ref } from "vue";
-  import EssentialLink from "components/EssentialLink.vue";
+  // import EssentialLink from "components/EssentialLink.vue";
 
   const linksList = [
     {
@@ -104,9 +131,9 @@
   export default defineComponent({
     name: "MainLayout",
 
-    components: {
-      EssentialLink,
-    },
+    // components: {
+    //   EssentialLink,
+    // },
 
     setup() {
       const leftDrawerOpen = ref(false);
@@ -117,7 +144,7 @@
       }
       return {
         user,
-        essentialLinks: linksList,
+        // essentialLinks: linksList,
         leftDrawerOpen,
         toggleLeftDrawer() {
           leftDrawerOpen.value = !leftDrawerOpen.value;
