@@ -106,7 +106,6 @@
             :class="`column no-wrap flex-center q-pa-none ${card.status}`"
           >
             <CreditCardView :card="card"/>
-
           </q-carousel-slide>
         </q-carousel>
         <div
@@ -169,55 +168,11 @@
               header-class="bg-accent q-pa-lg"
               expand-icon-class="text-white"
             >
-              <q-card
-                class="transaction-card__transaction"
-                flat
+              <TransactionView
                 v-for="txn in transactions"
                 :key="txn.id"
-              >
-                <q-item>
-                  <q-item-section avatar>
-                    <q-avatar size="xl" :class="`bg-${txn.icon.cssClass}`">
-                      <img
-                        :src="`/icons/${txn.icon.name}.svg`"
-                        class="transaction-card__transaction--avatar"
-                      />
-                    </q-avatar>
-                  </q-item-section>
-
-                  <q-item-section>
-                    <q-item-label class="text-dark-page flex">
-                      {{ txn.pos }}
-                      <q-space />
-                      <span
-                        class="text-right text-positive text-bold"
-                        v-if="txn.type != 'D'"
-                      >
-                        + {{ txn.currency }} {{ txn.amount }}</span
-                      >
-                      <span class="text-right text-bold" v-else
-                        >- {{ txn.currency }} {{ txn.amount }}</span
-                      >
-                    </q-item-label>
-                    <q-item-label caption>
-                      {{ new Date(txn.date).toLocaleDateString() }}
-                    </q-item-label>
-                    <p class="q-mt-sm text-primary">
-                      <q-badge
-                        color="primary"
-                        class="q-py-xs transaction-card__transaction--finance-badge"
-                      >
-                        <img src="/icons/business-and-finance.svg" />
-                      </q-badge>
-                      {{
-                        txn.type == "D"
-                          ? "Charged to debit card"
-                          : "Refund on debit card"
-                      }}
-                    </p>
-                  </q-item-section>
-                </q-item>
-              </q-card>
+                :txn="txn"
+              />
               <q-card class="bg-light-green-1 q-pb-sm q-pt-lg cursor-pointer">
                 <p class="text-positive text-center">
                   View all card transactions
@@ -237,6 +192,7 @@
   import CreditCardNew from "../components/CreditCardNew.vue";
   import CreditCardView from "../components/CreditCardView.vue";
   import ActionMenu from "../components/ActionMenu.vue";
+  import TransactionView from "../components/TransactionView.vue";
   import useUserStore from "../stores/user.js";
 
 
@@ -249,7 +205,8 @@
     components: {
       CreditCardNew,
       CreditCardView,
-      ActionMenu
+      ActionMenu,
+      TransactionView
     },
     setup() {
       const $q = useQuasar();
@@ -282,10 +239,6 @@
         slide.value = currentTabCards.value?.[0]?.id;
       }
 
-
-
-
-
       watch(tab, function () {
         slide.value = currentTabCards.value?.[0]?.id;
       });
@@ -297,10 +250,8 @@
         tab,
         slide,
         newCardDialog,
-
         isMobile: $q.platform.is.mobile,
         cardAdded,
-
         cardCanceled
       };
     },
