@@ -105,98 +105,8 @@
             :name="card.id"
             :class="`column no-wrap flex-center q-pa-none ${card.status}`"
           >
-            <div class="q-my-md my-card">
-              <div class="flex">
-                <q-space />
-                <q-btn
-                  v-if="card.isVisible"
-                  color="white"
-                  no-caps
-                  text-color="positive"
-                  unelevated
-                  class="my-card-btn__show-number"
-                  @click="toggleCard(card.id)"
-                >
-                  <!-- <img src="/icons/remove_red_eye-24px.svg" /> -->
-                  <span class="q-ml-sm">Hide card number</span>
-                </q-btn>
-                <q-btn
-                  v-else
-                  color="white"
-                  no-caps
-                  text-color="positive"
-                  unelevated
-                  class="my-card-btn__show-number"
-                  bordered
-                  @click="toggleCard(card.id)"
-                >
-                  <img src="/icons/remove_red_eye-24px.svg" />
-                  <span class="q-ml-sm">Show card number</span>
-                </q-btn>
-              </div>
-              <q-card
-                class="bg-positive desktop__credit-card q-pa-sm"
-                unelevated
-              >
-                <q-card-section class="flex">
-                  <q-space />
-                  <img src="/Logo-lg.svg" />
-                </q-card-section>
-                <q-card-section>
-                  <h4>{{ card.customer_name }}</h4>
-                  <p class="q-mt-lg q-mb-sm">
-                    <span v-if="card.isVisible" class="my-card__card-number">{{
-                      card.card_number.slice(0, -4)
-                    }}</span>
-                    <span v-else>
-                      <small v-for="count in 3" :key="count" class="q-mr-sm">
-                        <q-icon
-                          name="lens"
-                          size="xs"
-                          class="my-card__mask-icon"
-                        />
-                        <q-icon
-                          name="lens"
-                          size="xs"
-                          class="my-card__mask-icon"
-                        />
-                        <q-icon
-                          name="lens"
-                          size="xs"
-                          class="my-card__mask-icon"
-                        />
-                        <q-icon
-                          name="lens"
-                          size="xs"
-                          class="my-card__mask-icon"
-                        />
-                      </small>
-                    </span>
-                    <span class="my-card__card-number">{{
-                      card.card_number.slice(-4)
-                    }}</span>
-                  </p>
-                  <div class="row">
-                    <div class="col-5">
-                      <p>Thru: {{ card.card_expiry }}</p>
-                    </div>
-                    <div class="col-5">
-                      <p>
-                        CVV:
-                        <span v-if="card.isVisible">{{ card.card_cvv }}</span>
-                        <span class="text-h5" v-else>***</span>
-                      </p>
-                    </div>
-                    <div class="col-2">
-                      <img
-                        :src="`/icons/${facilityLogo[card.card_facility]}`"
-                        class="my-card__facility-logo"
-                      />
-                    </div>
-                  </div>
-                </q-card-section>
-              </q-card>
-            </div>
+            <CreditCardView :card="card"/>
+
           </q-carousel-slide>
         </q-carousel>
         <div
@@ -230,43 +140,7 @@
         </div>
         <q-card class="transaction-card q-mt-md" flat>
           <q-card-section class="bg-secondary">
-            <div class="row">
-              <div
-                class="col text-center cursor-pointer"
-                @click="freezeUnfreezeCard"
-              >
-                <q-avatar size="md">
-                  <img src="/icons/Freeze card.svg" />
-                </q-avatar>
-                <p class="text-dark">
-                  {{ isCurrentFreezed ? "Unfreeze" : "Freeze" }} card
-                </p>
-              </div>
-              <div class="col text-center">
-                <q-avatar size="md">
-                  <img src="/icons/Set spend limit.svg" />
-                </q-avatar>
-                <p class="text-dark">Set limit</p>
-              </div>
-              <div class="col text-center">
-                <q-avatar size="md">
-                  <img src="/icons/Gpay.svg" />
-                </q-avatar>
-                <p class="text-dark">Add to Gpay</p>
-              </div>
-              <div class="col text-center">
-                <q-avatar size="md">
-                  <img src="/icons/Replace card.svg" />
-                </q-avatar>
-                <p class="text-dark">Replace card</p>
-              </div>
-              <div class="col text-center cursor-pointer" @click="cancelCard">
-                <q-avatar size="md">
-                  <img src="/icons/Deactivate card.svg" />
-                </q-avatar>
-                <p class="text-dark">Cancel card</p>
-              </div>
-            </div>
+            <ActionMenu @cardCanceled="cardCanceled" :slide="slide" :currentTabCards="currentTabCards" />
           </q-card-section>
         </q-card>
       </div>
@@ -360,36 +234,38 @@
 <script>
   import { defineComponent, ref, computed, watch } from "vue";
   import { useQuasar } from "quasar";
-  import CreditCardNew from "../components/CreditCard-New.vue";
-  import CreditCardView from "../components/CreditCard-View.vue";
+  import CreditCardNew from "../components/CreditCardNew.vue";
+  import CreditCardView from "../components/CreditCardView.vue";
+  import ActionMenu from "../components/ActionMenu.vue";
   import useUserStore from "../stores/user.js";
 
-  let facilityLogo = {
-    Visa: "Facility-Visa.svg",
-    Master: "Facility-Master.svg",
-    Aspire: "Facility-Aspire.svg",
-  };
+
 
   let newCardDialog = ref(false);
   let tab = ref("cards--my-debit");
 
   export default defineComponent({
     name: "IndexPage",
+    components: {
+      CreditCardNew,
+      CreditCardView,
+      ActionMenu
+    },
     setup() {
       const $q = useQuasar();
       const userStore = useUserStore();
 
-      let account = computed(function(){
+      let account = computed(function () {
         return userStore.account;
       });
-      let transactions = computed(function(){
+      let transactions = computed(function () {
         return userStore.transactions;
       });
 
       function cardAdded(newCard) {
         newCard.company = tab.value == "cards--my-debit" ? "aspire" : "other";
-        newCardDialog.value = "false";
-        slide.value = newId;
+        newCardDialog.value = false;
+        slide.value = newCard.id;
       }
 
       let currentTabCards = computed(() => {
@@ -402,112 +278,30 @@
 
       let slide = ref(currentTabCards.value?.[0]?.id);
 
-      let isCurrentFreezed = computed(() => {
-        return (
-          userStore.cards.filter((card) => {
-            return card.id == slide.value;
-          })?.[0]?.status == "frozen"
-        );
-      });
-
-      function toggleCard(id) {
-        userStore.cards.value = userStore.cards.value.map((card) => {
-          if (card.id == id) {
-            card.isVisible = !card.isVisible;
-          }
-          return card;
-        });
+      function cardCanceled(){
+        slide.value = currentTabCards.value?.[0]?.id;
       }
 
-      function freezeUnfreezeCard() {
-        if (currentTabCards.value.length < 1) {
-          return $q.dialog({
-            message: "No active cards available!",
-          });
-        }
-        userStore.cards.value = userStore.cards.value.map((card) => {
-          // console.log(cards);
-          if (card.id == slide.value) {
-            card.status = card.status === "frozen" ? "active" : "frozen";
-          }
-          return card;
-        });
-        $q.notify({
-          color: "green-4",
-          textColor: "white",
-          position: "top",
-          icon: "check_circle",
-          message: "Card updated successfully",
-        });
-      }
 
-      function cancelCard() {
-        if (currentTabCards.value.length < 1) {
-          return $q.dialog({
-            message: "No active cards available!",
-          });
-        }
-        $q.dialog({
-          title: "Confirm",
-          message: "Are you sure to cancel this card ?",
-          cancel: true,
-        }).onOk(() => {
-          userStore.cards.value = userStore.cards.value.filter((card) => card.id !== slide.value);
-          slide.value = currentTabCards.value?.[0]?.id;
-        });
-      }
+
+
 
       watch(tab, function () {
         slide.value = currentTabCards.value?.[0]?.id;
-      });
-
-      watch(newCardDialog, function () {
-        let random = Math.random().toString().split(".")[1].padEnd(16, 0);
-        let customer_name = [
-          "Santosh",
-          "Thanh",
-          "Alex",
-          "Nawaf",
-          "Deepak",
-          "Chan",
-          "Abu Saleem",
-          "Nick Fury",
-          "Tony Stark",
-          "Loki",
-        ][random[0]];
-        let card_number = ("4" + random)
-          .slice(0, 16)
-          .match(/.{1,4}/g)
-          .join(" ");
-        let card_expiry = `${+random[0] + 1} / 30`.padStart(7, 0);
-        let card_cvv = random.slice(3, 6);
-
-        newCard.value = {
-          customer_name,
-          card_number,
-          card_expiry,
-          card_cvv,
-          accept: false,
-        };
       });
 
       return {
         account,
         currentTabCards,
         transactions,
-        facilityLogo,
-        toggleCard,
         tab,
         slide,
         newCardDialog,
 
-
-        freezeUnfreezeCard,
-        isCurrentFreezed,
-        cancelCard,
         isMobile: $q.platform.is.mobile,
-        CreditCardNew,
-        CreditCardView,
+        cardAdded,
+
+        cardCanceled
       };
     },
   });
